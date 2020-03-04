@@ -1,6 +1,8 @@
 import logging
 import asyncio
 from hbmqtt.broker import Broker
+from hbmqtt.client import MQTTClient, ClientException
+from hbmqtt.mqtt.constants import QOS_1
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +29,9 @@ def startBroker():
 @asyncio.coroutine
 def brokerGetMessage():
     C = MQTTClient()
-    yield from C.connect('mqtt://localhost:1883')
+    yield from C.connect('mqtt://localhost:1883/')
     yield from C.subscribe([
-        ("topic/test", QOS_1)
+        ("test/test", QOS_1)
     ])
     logger.info('Subscribed!')
     try:
@@ -44,4 +46,5 @@ if __name__ == '__main__':
     formatter = "[%(asctime)s]  :: %(levelname)s :: %(name)s :: %(message)s"
     logging.basicConfig(level=logging.INFO, format=formatter)
     asyncio.get_event_loop().run_until_complete(startBroker())
+    # asyncio.get_event_loop().run_until_complete(brokerGetMessage())
     asyncio.get_event_loop().run_forever()

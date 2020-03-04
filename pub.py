@@ -1,16 +1,53 @@
-import paho.mqtt.client as mqtt
+# # publisher
+# import paho.mqtt.client as mqtt
+#
+# client = mqtt.Client()
+# client.connect('localhost', 9999)
+#
+# while True:
+#     client.publish("test/test", input('Message : '))
 
-client = mqtt.Client()
-client.connect('localhost',1883) #as Broker
+
+import paho.mqtt.client as mqttClient
+import time
 
 def on_connect(client, userdata, flags, rc):
-    if rc==0:
-        print("connected OK Returned code= ",rc)
-        client.subscribe("topic/test")
+
+    if rc == 0:
+
+        print("Connected to broker")
+
+        global Connected                #Use global variable
+        Connected = True                #Signal connection
+
     else:
-        print("Bad connection Returned code=",rc)
 
+        print("Connection failed")
 
-while True:
-    client.on_connect = on_connect
-    client.publish("topic/test", input('Message : '))
+Connected = False   #global variable for the state of the connection
+
+broker_address= "localhost"
+port = 1883
+# user = "yourUser"
+# password = "yourPassword"
+
+client = mqttClient.Client("Python")               #create new instance
+# client.username_pw_set(user, password=password)    #set username and password
+client.on_connect= on_connect                      #attach function to callback
+client.connect(broker_address, port=port)          #connect to broker
+
+client.loop_start()        #start the loop
+
+while Connected != True:    #Wait for connection
+    time.sleep(0.1)
+
+try:
+    while True:
+
+        value = input('Enter the message:')
+        client.publish("test/test",value)
+
+except KeyboardInterrupt:
+
+    client.disconnect()
+    client.loop_stop()
