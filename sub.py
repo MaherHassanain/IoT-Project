@@ -1,22 +1,44 @@
+# #subscriber
+# import paho.mqtt.client as mqtt
+#
+# client = mqtt.Client()
+# client.connect('localhost', 9999)
+#
+# def on_connect(client, userdata, flags, rc):
+#     print("Connected to a broker!")
+#     client.subscribe("test/test")
+#
+# def on_message(client, userdata, message):
+#     print(message.payload.decode())
+#
+# while True:
+#     client.on_connect = on_connect
+#     client.on_message = on_message
+#     client.loop_forever()
+#
+
 import paho.mqtt.client as mqtt
 
-client = mqtt.Client()
-client.connect('localhost',1883) #as Broker
-
+# The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
-    if rc==0:
-        print("connected OK Returned code= ",rc)
-        client.subscribe("topic/test")
-    else:
-        print("Bad connection Returned code=",rc)
+    print("Connected with result code "+str(rc))
 
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe("test/test")
 
-def on_message(client, userdata , message):
-    print(message.paylaod.decode())
-    print("message receieved")
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    print(msg.topic+" "+str(msg.payload))
 
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
 
-while True:
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.loop_forever()
+client.connect("localhost", 1883)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
